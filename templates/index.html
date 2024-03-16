@@ -1,0 +1,166 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MediScan</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="{% static 'style.css' %}" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/boxicons/2.1.0/css/boxicons.min.css"
+    integrity="sha512-pVCM5+SN2+qwj36KonHToF2p1oIvoU3bsqxphdOIWMYmgr4ZqD3t5DjKvvetKhXGc/ZG5REYTT6ltKfExEei/Q=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <link href="https://cdn.jsdelivr.net/npm/cropperjs@1.5.12/dist/cropper.min.css" rel="stylesheet">
+  <link rel="shortcut icon" href="../static/MediScan.svg" type="image/x-icon">
+  <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.5.12/dist/cropper.min.js"></script>
+
+</head>
+
+<body>
+  <div class="container mt-5">
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+        <div class="card shadow">
+          <div class="card-header">
+            <h4 class="card-title text-center my-1 "><a class="text-black" href="/">MediScan</a></h4>
+          </div>
+          <div class="card-body py-1">
+
+            <!-- start the form here -->
+            <form action="{% url 'upload_form' %}" method="post" enctype="multipart/form-data" id="imageUploadForm">
+              {% csrf_token %}
+
+              <div class="mt-3">
+                <label class="form-label" for="fileInput">Upload Picture</label>
+                <div class="input-group">
+                  <!-- input file -->
+                  <input type="file" id="fileInput" class="form-control" name="img_file" accept="image/*" required />
+                  <button class="btn btn-outline-success" type="button" id="openCameraBtn">
+                    <i class="fas fa-camera"></i>
+                    <b>Camera</b>
+                  </button>
+                </div>
+
+                <div class="img-container mt-4" id="show-the-img">
+
+                  <img id="image" alt="Uploaded Image" class="hidden" style="max-width: 100%; height: auto;">
+                </div>
+
+                <div class="img-container mt-3 border border-success-subtle" id="cropped-container"
+                  style="display: none;">
+                  <img src="" id="outputImg">
+                </div>
+
+                <!-- webcam -->
+                <div class="main-container my-0 py-0">
+                  <div class="img-container" id="webcam-container" style="display: none;">
+                    <video id="webcam" autoplay style="width: 100%; height: auto; margin: auto; "></video>
+                    <div class="input-group mt-3 flex gap-3 justify-content-center">
+                      <button class="btn btn-primary px-3" type="button" id="captureBtn">
+                        <i class="fas fa-camera"></i>
+                        <b>Capture</b>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="img-container" style="display: none;" id="capturedImageContainer">
+                    <img id="capturedImage">
+                  </div>
+
+                  <div class="img-container my-5" id="cropped-container" style="display: none;">
+                    <img src="" id="outputImg">
+                  </div>
+
+                </div>
+
+                <!-- submit button -->
+                <div class="input-group mt-3 flex gap-3 justify-content-center">
+                  <button type="submit" class="btn btn-success rounded-2 px-4 mb-3" style="display:none;"
+                    id="submitFinalBtn">Submit</button>
+                  <button id="btn-crop" class="btn btn-primary hidden rounded-2 px-4 mb-3">Crop</button>
+                </div>
+
+                {% if submitted %}
+                <div class="img-container mb-4 border border-success-subtle">
+                  <img src="/media/image.png" id="imageToShow" style="display: block;">
+                </div>
+                {% endif %}
+              </div>
+
+            </form>
+            <!-- end the form here -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div><br>
+
+  <!-- {% if submitted %}
+  <div class="img-container">
+    <img src="/media/image.png" alt="">
+  </div>
+  {% endif %} -->
+
+  {% if med_data %}
+  <div class="med-table " style="width: 75%; margin:auto">
+    <div class="card m-4 my-5 px-5 py-2" id="medicineTable">
+      <div class="my-4">
+        <div class="container">
+          <div class="row align-items-center">
+            <div class="col-md-4">
+              <div class="mb-3">
+                <h5 class="card-title">
+                  Medicine List <span class="text-muted fw-normal"></span>
+                </h5>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-lg-12">
+              <div class="">
+                <div class="table-responsive">
+                  <table id="table-row" class="table project-list-table table-nowrap align-middle table-borderless">
+                    <thead>
+                      <tr>
+                        <th scope="col">Type</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Power</th>
+                        <th scope="col">Schedule</th>
+                        <th scope="col">Duration</th>
+                        <th scope="col">Pack Size</th>
+                        <th scope="col">Price</th>
+                      </tr>
+                    </thead>
+
+                    <tbody id="medicineTableBody">
+                      {% for med_dict in med_data %}
+                      <tr>
+                        <td>{{ med_dict.Type }}</td>
+                        <td>{{ med_dict.Name }}</td>
+                        <td>{{ med_dict.Power }}</td>
+                        <td>{{ med_dict.Schedule }}</td>
+                        <td>{{ med_dict.Duration }}</td>
+                        <td>{{ med_dict.Size }}</td>
+                        <td>{{ med_dict.Price }}</td>
+                      </tr>
+                      {% endfor %}
+                    </tbody>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script> -->
+  <script src="{% static 'script.js' %}"></script>
+
+</body>
+
+</html>
